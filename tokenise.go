@@ -3,8 +3,9 @@ package mathparse
 import (
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
+
+	fmp "github.com/sourcekris/goflint"
 )
 
 type Parser struct {
@@ -17,7 +18,7 @@ type Parser struct {
 type Token struct {
 	Type       TokenType
 	Value      string
-	ParseValue float64
+	ParseValue *fmp.Fmpz
 	Children   []Token
 }
 
@@ -35,14 +36,28 @@ const (
 	funcDelim                  // 8
 )
 
+// String returns a string representation of a token.
+func (t *Token) String() string {
+	res := fmt.Sprintf("Type: %d, Value: %s, ParseValue: %v, Num. Children: %d\n", t.Type, t.Value, t.ParseValue, len(t.Children))
+	if t.Children != nil {
+		for _, c := range t.Children {
+			res = fmt.Sprintf("%s\tChild: %s", res, c.String())
+		}
+	}
+	return res
+}
+
 // "89sin(45) + 2.2x/7"
 
+// ReadExpression tokenises an expression given string str.
 func (p *Parser) ReadExpression(str string) {
 	p.expression = str
 	p.tokens = []Token{}
 	p.tokenise()
 }
 
+// ReadMultipartExpression tokenizes an expression expressed as multiple parts in a string slice
+// str.
 func (p *Parser) ReadMultipartExpression(str []string) {
 	p.expression = strings.Join(str, " ")
 	p.tokens = []Token{}
@@ -143,7 +158,7 @@ func newToken(typ TokenType, value string) Token {
 		Value: value,
 	}
 	if typ == literal {
-		tok.ParseValue, _ = strconv.ParseFloat(value, 64)
+		tok.ParseValue, _ = new(fmp.Fmpz).SetString(value, 10)
 	}
 	return tok
 }
@@ -187,7 +202,7 @@ func isLetter(let string) bool {
 }
 
 func isOperator(let string) bool {
-	res, err := regexp.MatchString(`\*|\/|\+|\^|\-`, let)
+	res, err := regexp.MatchString(`\*|\/|\+|\^|\-|%`, let)
 	// "\x43|\x47|\x42|\x94|\x45"
 	if err != nil {
 		fmt.Print(err)

@@ -1,10 +1,10 @@
 package mathparse
 
 import (
-	"math"
-	"strconv"
+	fmp "github.com/sourcekris/goflint"
 )
 
+// Resolve resolves the expression in Parser p into the resulting integer or expression string.
 func (p *Parser) Resolve() {
 	// parenthases
 	// exponents/roots
@@ -13,6 +13,12 @@ func (p *Parser) Resolve() {
 	// functions
 	// repeat
 	p.tokens = parseExpression(p.tokens)
+}
+
+// Eval resolves the expression and returns the Value Result which may be nil.
+func (p *Parser) Eval() *fmp.Fmpz {
+	p.Resolve()
+	return p.GetValueResult()
 }
 
 func parseExpression(set []Token) []Token {
@@ -24,8 +30,8 @@ func parseExpression(set []Token) []Token {
 		if set[i].Type == operation {
 			if (set[i].Value == "^") && (set[i-1].Type == literal && set[i+1].Type == literal) {
 				mod = true
-				set[i-1].ParseValue = math.Pow(set[i-1].ParseValue, set[i+1].ParseValue)
-				set[i-1].Value = strconv.FormatFloat(set[i-1].ParseValue, 'f', -1, 64)
+				set[i-1].ParseValue = new(fmp.Fmpz).Exp(set[i-1].ParseValue, set[i+1].ParseValue, nil)
+				set[i-1].Value = set[i-1].ParseValue.String()
 				set = append(set[:i], set[i+2:]...)
 				i--
 			}
@@ -33,14 +39,16 @@ func parseExpression(set []Token) []Token {
 	}
 	for i := 1; i < len(set)-1; i++ {
 		if set[i].Type == operation {
-			if (set[i].Value == "*" || set[i].Value == "/") && (set[i-1].Type == literal && set[i+1].Type == literal) {
+			if (set[i].Value == "*" || set[i].Value == "/" || set[i].Value == "%") && (set[i-1].Type == literal && set[i+1].Type == literal) {
 				mod = true
 				if set[i].Value == "*" {
-					set[i-1].ParseValue = set[i-1].ParseValue * set[i+1].ParseValue
+					set[i-1].ParseValue = new(fmp.Fmpz).Mul(set[i-1].ParseValue, set[i+1].ParseValue)
 				} else if set[i].Value == "/" {
-					set[i-1].ParseValue = set[i-1].ParseValue / set[i+1].ParseValue
+					set[i-1].ParseValue = new(fmp.Fmpz).Div(set[i-1].ParseValue, set[i+1].ParseValue)
+				} else if set[i].Value == "%" {
+					set[i-1].ParseValue = new(fmp.Fmpz).Mod(set[i-1].ParseValue, set[i+1].ParseValue)
 				}
-				set[i-1].Value = strconv.FormatFloat(set[i-1].ParseValue, 'f', -1, 64)
+				set[i-1].Value = set[i-1].ParseValue.String()
 				set = append(set[:i], set[i+2:]...)
 				i--
 			}
@@ -52,11 +60,11 @@ func parseExpression(set []Token) []Token {
 			if (set[i].Value == "+" || set[i].Value == "-") && (set[i-1].Type == literal && set[i+1].Type == literal) {
 				mod = true
 				if set[i].Value == "+" {
-					set[i-1].ParseValue = set[i-1].ParseValue + set[i+1].ParseValue
+					set[i-1].ParseValue = new(fmp.Fmpz).Add(set[i-1].ParseValue, set[i+1].ParseValue)
 				} else if set[i].Value == "-" {
-					set[i-1].ParseValue = set[i-1].ParseValue - set[i+1].ParseValue
+					set[i-1].ParseValue = new(fmp.Fmpz).Sub(set[i-1].ParseValue, set[i+1].ParseValue)
 				}
-				set[i-1].Value = strconv.FormatFloat(set[i-1].ParseValue, 'f', -1, 64)
+				set[i-1].Value = set[i-1].ParseValue.String()
 				set = append(set[:i], set[i+2:]...)
 				i--
 			}
@@ -73,26 +81,18 @@ func parseExpression(set []Token) []Token {
 		if set[i].Type == function {
 			mod = true
 			switch set[i].Value {
-			case "sin":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Sin(set[i].Children[0].ParseValue), 'f', -1, 64))
-			case "cos":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Cos(set[i].Children[0].ParseValue), 'f', -1, 64))
-			case "tan":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Tan(set[i].Children[0].ParseValue), 'f', -1, 64))
 			case "abs":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Abs(set[i].Children[0].ParseValue), 'f', -1, 64))
-			case "log":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Log(set[i].Children[0].ParseValue), 'f', -1, 64))
+				set[i] = newToken(literal, new(fmp.Fmpz).Abs(set[i].Children[0].ParseValue).String())
 			case "sqrt":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Sqrt(set[i].Children[0].ParseValue), 'f', -1, 64))
+				set[i] = newToken(literal, new(fmp.Fmpz).Root(set[i].Children[0].ParseValue, 2).String())
 			case "max":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Max(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue), 'f', -1, 64))
+				set[i] = newToken(literal, new(fmp.Fmpz).Max(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue).String())
 			case "min":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Min(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue), 'f', -1, 64))
+				set[i] = newToken(literal, new(fmp.Fmpz).Min(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue).String())
 			case "mod":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Mod(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue), 'f', -1, 64))
+				set[i] = newToken(literal, new(fmp.Fmpz).Mod(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue).String())
 			case "pow":
-				set[i] = newToken(literal, strconv.FormatFloat(math.Pow(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue), 'f', -1, 64))
+				set[i] = newToken(literal, new(fmp.Fmpz).Exp(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue, nil).String())
 			}
 		}
 	}
