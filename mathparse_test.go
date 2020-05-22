@@ -51,16 +51,18 @@ func TestGetValueResult(t *testing.T) {
 		{"2*3+1", false, 7},
 		{"2*3/2", false, 3},
 		{"2/2*3", false, 3},
-		//Testing precedence
+		// Testing precedence.
 		{"1+2*3/2", false, 4},
 		{"-3+3*2+5-2*2", false, 4},
 		{"4+3-2+1", false, 6},
 		{"2-3+4-2", false, 1},
 		{"24*3+15*2-31*4-1+2", false, -21},
-		//Testing brackets
+		// Testing brackets
 		{"(1+2)*3", false, 9},
 		{"3*(1+2)", false, 9},
 		{"3*(1+2)*4", false, 36},
+		// Embedded expressions.
+		{"(3*4+(4*7)+55)+(5*5)", false, 120},
 		//Testing expressions with variables. Where {x:5}
 		// I didn't make this work yet.
 		// {"2*x", false, 2 * x},
