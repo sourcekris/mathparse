@@ -34,3 +34,51 @@ func TestGetExpressionResults(t *testing.T) {
 		}
 	}
 }
+
+func TestGetValueResult(t *testing.T) {
+	for _, tc := range []struct {
+		expression string
+		wantErr    bool
+		want       int
+	}{
+		// Copied the unit tests from a similar library.
+		{"2^2", false, 4},
+		{"1+1", false, 2},
+		{"-1+2", false, 1},
+		{"2-1", false, 1},
+		{"1-10", false, -9},
+		{"1+2*3", false, 7},
+		{"2*3+1", false, 7},
+		{"2*3/2", false, 3},
+		{"2/2*3", false, 3},
+		//Testing precedence
+		{"1+2*3/2", false, 4},
+		{"-3+3*2+5-2*2", false, 4},
+		{"4+3-2+1", false, 6},
+		{"2-3+4-2", false, 1},
+		{"24*3+15*2-31*4-1+2", false, -21},
+		//Testing brackets
+		{"(1+2)*3", false, 9},
+		{"3*(1+2)", false, 9},
+		{"3*(1+2)*4", false, 36},
+		//Testing expressions with variables. Where {x:5}
+		// I didn't make this work yet.
+		// {"2*x", false, 2 * x},
+		// {"2*x+y+(z+x)*4", false, float64(2*x + y + (z+x)*4)},
+		// {"1+x*(50-y)/z", false, float64(1 + x*(50-y)/z)},
+	} {
+		//t.Errorf("%v", new(fmp.Fmpz).Add(fmp.NewFmpz(-1), fmp.NewFmpz(2)))
+		p := NewParser(tc.expression)
+		v := p.Eval()
+		var got int
+		if v != nil {
+			got = v.GetInt()
+		} else {
+			t.Fatalf("GetValueResult() failed: %s got nil Fmpz", tc.expression)
+		}
+
+		if got != tc.want {
+			t.Errorf("GetValueResult() %q failed: got/want mismatched: %d / %d", tc.expression, got, tc.want)
+		}
+	}
+}

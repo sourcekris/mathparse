@@ -80,7 +80,7 @@ func (p *Parser) tokenise() {
 			p.numberBuffer = ""
 		}
 	}
-	for _, ch := range p.expression {
+	for i, ch := range p.expression {
 		switch getTokenType(ch) {
 		case space:
 			continue
@@ -93,6 +93,10 @@ func (p *Parser) tokenise() {
 			}
 			p.letterBuffer += string(ch)
 		case operation:
+			// A hack to support leading negative numbers, prepend a 0.
+			if i == 0 && ch == '-' {
+				p.tokens = append(p.tokens, newToken(literal, "0"))
+			}
 			dumpNumber(p)
 			dumpLetter(p)
 			p.tokens = append(p.tokens, newToken(operation, string(ch)))

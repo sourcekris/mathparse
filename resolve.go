@@ -15,9 +15,23 @@ func (p *Parser) Resolve() {
 	p.tokens = parseExpression(p.tokens)
 }
 
-// Eval resolves the expression and returns the Value Result which may be nil.
+// Eval continuously resolves the expression until we cannot resolve any further and returns the
+// Value Result or nil if the expression never resolves.
 func (p *Parser) Eval() *fmp.Fmpz {
-	p.Resolve()
+	el := len(p.GetExpressionResult())
+	for {
+		p.Resolve()
+		if p.FoundResult() {
+			break
+		}
+
+		if len(p.GetExpressionResult()) == el {
+			return nil
+		}
+
+		el = len(p.GetExpressionResult())
+	}
+
 	return p.GetValueResult()
 }
 
@@ -76,6 +90,8 @@ func parseExpression(set []Token) []Token {
 		if set[i].Type == lparen {
 			if len(set[i].Children) == 1 {
 				set[i] = set[i].Children[0]
+			} else {
+				set[i].Children = parseExpression(set[i].Children)
 			}
 		}
 		if set[i].Type == function {
