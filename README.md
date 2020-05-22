@@ -57,7 +57,7 @@ of true means an integer value can be retrieved, otherwise, a polynomial
   }
 ```
 
-Here `GetValueResult` retreives the float result of the expression, and `GetExpressionResult` will
+Here `GetValueResult` retreives the integer result of the expression, and `GetExpressionResult` will
 return the expressions simplified form
 
 
@@ -92,7 +92,7 @@ The structure of each token is quite simple:
 ```
 
 Type is the type of token, from an enum (see below), value, which is the raw string value of the
-token (i.e. "3.8", "+", "a", etc), ParseValue, which is the float of the value, if the type is a
+token (i.e. "3.8", "+", "a", etc), ParseValue, which is the integer of the value, if the type is a
 literal. And lastly, Children, which will contain child tokens nested under this token, which is
 only the case for functions, and Parenthesis.
 
@@ -104,7 +104,7 @@ const (
   space                      // 1 - space character, ignored
   literal                    // 2 - a literal, a number
   variable                   // 3 - variables
-  operation                  // 4 - any of the following mathematical operations: * / + - ^
+  operation                  // 4 - any of the following mathematical operations: * / + - ^ %
   function                   // 5 - a function, it will have the expression for its arguements as Child tokens
   lparen                     // 6 - opening parenthesis, will have the enclosed expression as Child tokens
   rparen                     // 7 - closing parenthesis, used internally, stripped in tree creation, used to mark the end of the current function or parenthesis
