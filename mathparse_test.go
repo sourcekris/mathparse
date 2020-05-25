@@ -124,34 +124,34 @@ func TestEval(t *testing.T) {
 func TestEvalf(t *testing.T) {
 	for _, tc := range []struct {
 		expression string
-		a1         *fmp.Fmpz
-		a2         *fmp.Fmpz
+		a1         string
+		a2         string
+		a3         string
 		wantErr    bool
-		want       int
+		want       string
 	}{
 		{
-			"%v * %v",
-			fmp.NewFmpz(3),
-			fmp.NewFmpz(4),
-			false,
-			12,
+			expression: "mod(%v, ((%v-1)*(%v-1)))",
+			a1:         "5917380627180988719",
+			a2:         "812817218",
+			a3:         "213831928",
+			wantErr:    false,
+			want:       "7967385644825313",
 		},
 	} {
 		//t.Errorf("%v", new(fmp.Fmpz).Add(fmp.NewFmpz(-1), fmp.NewFmpz(2)))
-		v, err := Evalf(tc.expression, tc.a1, tc.a2)
-		if err != nil {
+		a1, _ := new(fmp.Fmpz).SetString(tc.a1, 10)
+		a2, _ := new(fmp.Fmpz).SetString(tc.a2, 10)
+		a3, _ := new(fmp.Fmpz).SetString(tc.a3, 10)
+		want, _ := new(fmp.Fmpz).SetString(tc.want, 10)
+
+		got, err := Evalf(tc.expression, a1, a2, a3)
+		if err != nil && !tc.wantErr {
 			t.Fatalf("Eval() failed %s: got err when didnt want err: %v", tc.expression, err)
 		}
 
-		var got int
-		if v != nil {
-			got = v.GetInt()
-		} else {
-			t.Fatalf("Eval() failed: %s got nil Fmpz", tc.expression)
-		}
-
-		if got != tc.want {
-			t.Errorf("Eval() %q failed: got/want mismatched: %d / %d", tc.expression, got, tc.want)
+		if !got.Equals(want) {
+			t.Errorf("Evalf() %q failed: got/want mismatched: %v / %v", tc.expression, got, tc.want)
 		}
 	}
 }

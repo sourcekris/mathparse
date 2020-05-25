@@ -119,22 +119,27 @@ func parseExpression(set []Token) []Token {
 				set[i].Children = parseExpression(set[i].Children)
 			}
 		}
+
 		if set[i].Type == function {
 			mod = true
-			switch set[i].Value {
-			case "abs":
+			sv := set[i].Value
+			switch {
+			case sv == "abs":
 				set[i] = newToken(literal, new(fmp.Fmpz).Abs(set[i].Children[0].ParseValue).String())
-			case "sqrt":
+			case sv == "sqrt":
 				set[i] = newToken(literal, new(fmp.Fmpz).Root(set[i].Children[0].ParseValue, 2).String())
-			case "max":
+			case set[i].Children[2].Children != nil:
+				// We haven't resolved the inner parenthesese yet, were not ready for the multiparameter functions.
+				continue
+			case sv == "max":
 				set[i] = newToken(literal, new(fmp.Fmpz).Max(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue).String())
-			case "min":
+			case sv == "min":
 				set[i] = newToken(literal, new(fmp.Fmpz).Min(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue).String())
-			case "mod":
+			case sv == "mod":
 				set[i] = newToken(literal, new(fmp.Fmpz).Mod(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue).String())
-			case "pow":
+			case sv == "pow":
 				set[i] = newToken(literal, new(fmp.Fmpz).Exp(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue, nil).String())
-			case "invmod":
+			case sv == "invmod":
 				set[i] = newToken(literal, new(fmp.Fmpz).ModInverse(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue).String())
 			}
 		}
