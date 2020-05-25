@@ -1,6 +1,8 @@
 package mathparse
 
 import (
+	"fmt"
+
 	fmp "github.com/sourcekris/goflint"
 )
 
@@ -33,6 +35,18 @@ func (p *Parser) Eval() *fmp.Fmpz {
 	}
 
 	return p.GetValueResult()
+}
+
+// Eval will create a new parser from an expressions and Evaluate the expression until it resolves
+// or results in error. Returns an fmpz or an error.
+func Eval(expression string) (*fmp.Fmpz, error) {
+	p := NewParser(expression)
+
+	if val := p.Eval(); val != nil {
+		return val, nil
+	}
+
+	return nil, fmt.Errorf("eval could not resolve expression %q: %v", expression, p.GetExpressionResult())
 }
 
 func parseExpression(set []Token) []Token {
