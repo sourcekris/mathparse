@@ -21,7 +21,6 @@ func (p *Parser) Resolve() {
 // Value Result or nil if the expression never resolves.
 func (p *Parser) Eval() *fmp.Fmpz {
 	el := len(p.GetExpressionResult())
-	fmt.Printf("el: %v\n", el)
 	for {
 		p.Resolve()
 		if p.FoundResult() {
@@ -121,7 +120,6 @@ func parseExpression(set []Token) []Token {
 			case "min":
 				set[i] = newToken(literal, new(fmp.Fmpz).Min(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue).String())
 			case "mod":
-				fmt.Printf("set[i]: %v\n", set[i].String())
 				set[i] = newToken(literal, new(fmp.Fmpz).Mod(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue).String())
 			case "pow":
 				set[i] = newToken(literal, new(fmp.Fmpz).Exp(set[i].Children[0].ParseValue, set[i].Children[2].ParseValue, nil).String())

@@ -65,6 +65,7 @@ func TestGetValueResult(t *testing.T) {
 		{"(3*4+(4*7)+55)+(5*5)", false, 120},
 		// Functions.
 		{"mod(300, 40)", false, 20},
+		{"invmod(301, 400)", false, 101},
 	} {
 		//t.Errorf("%v", new(fmp.Fmpz).Add(fmp.NewFmpz(-1), fmp.NewFmpz(2)))
 		p := NewParser(tc.expression)

@@ -170,21 +170,23 @@ func newToken(typ TokenType, value string) Token {
 
 func getTokenType(ch rune) TokenType {
 	let := string(ch)
-	if let == " " {
+	switch {
+	case let == " ":
 		return space
-	} else if isDigit(let) {
+	case isDigit(let):
 		return literal
-	} else if isLetter(let) {
+	case isLetter(let):
 		return variable
-	} else if isOperator(let) {
+	case isOperator(let):
 		return operation
-	} else if isOpenParen(let) {
+	case isOpenParen(let):
 		return lparen
-	} else if isCloseParen(let) {
+	case isCloseParen(let):
 		return rparen
-	} else if isComma(let) {
+	case isComma(let):
 		return funcDelim
 	}
+
 	return undefined
 }
 
