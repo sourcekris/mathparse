@@ -8,6 +8,7 @@ import (
 	fmp "github.com/sourcekris/goflint"
 )
 
+// Parser encapsulates the parsed tokens and values.
 type Parser struct {
 	letterBuffer string
 	numberBuffer string
@@ -15,6 +16,7 @@ type Parser struct {
 	tokens       []Token
 }
 
+// Token encodes a single token and its children.
 type Token struct {
 	Type       TokenType
 	Value      string
@@ -22,6 +24,7 @@ type Token struct {
 	Children   []Token
 }
 
+// TokenType describes the type of token.
 type TokenType uint
 
 const (
