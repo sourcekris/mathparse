@@ -63,11 +63,8 @@ func TestGetValueResult(t *testing.T) {
 		{"3*(1+2)*4", false, 36},
 		// Embedded expressions.
 		{"(3*4+(4*7)+55)+(5*5)", false, 120},
-		//Testing expressions with variables. Where {x:5}
-		// I didn't make this work yet.
-		// {"2*x", false, 2 * x},
-		// {"2*x+y+(z+x)*4", false, float64(2*x + y + (z+x)*4)},
-		// {"1+x*(50-y)/z", false, float64(1 + x*(50-y)/z)},
+		// Functions.
+		{"mod(300, 40)", false, 20},
 	} {
 		//t.Errorf("%v", new(fmp.Fmpz).Add(fmp.NewFmpz(-1), fmp.NewFmpz(2)))
 		p := NewParser(tc.expression)

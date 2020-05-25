@@ -50,8 +50,6 @@ func (t *Token) String() string {
 	return res
 }
 
-// "89sin(45) + 2.2x/7"
-
 // ReadExpression tokenises an expression given string str.
 func (p *Parser) ReadExpression(str string) {
 	p.expression = str
@@ -184,6 +182,8 @@ func getTokenType(ch rune) TokenType {
 		return lparen
 	} else if isCloseParen(let) {
 		return rparen
+	} else if isComma(let) {
+		return funcDelim
 	}
 	return undefined
 }
