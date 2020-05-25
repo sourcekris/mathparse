@@ -2,6 +2,8 @@ package mathparse
 
 import (
 	"testing"
+
+	fmp "github.com/sourcekris/goflint"
 )
 
 func TestGetExpressionResults(t *testing.T) {
@@ -79,6 +81,77 @@ func TestGetValueResult(t *testing.T) {
 
 		if got != tc.want {
 			t.Errorf("GetValueResult() %q failed: got/want mismatched: %d / %d", tc.expression, got, tc.want)
+		}
+	}
+}
+
+func TestEval(t *testing.T) {
+	for _, tc := range []struct {
+		expression string
+		wantErr    bool
+		want       int
+	}{
+		{
+			"3 * 4",
+			false,
+			12,
+		},
+		{
+			"mod(300,40)",
+			false,
+			20,
+		},
+	} {
+		//t.Errorf("%v", new(fmp.Fmpz).Add(fmp.NewFmpz(-1), fmp.NewFmpz(2)))
+		v, err := Eval(tc.expression)
+		if err != nil {
+			t.Fatalf("Eval() failed %s: got err when didnt want err: %v", tc.expression, err)
+		}
+
+		var got int
+		if v != nil {
+			got = v.GetInt()
+		} else {
+			t.Fatalf("Eval() failed: %s got nil Fmpz", tc.expression)
+		}
+
+		if got != tc.want {
+			t.Errorf("Eval() %q failed: got/want mismatched: %d / %d", tc.expression, got, tc.want)
+		}
+	}
+}
+
+func TestEvalf(t *testing.T) {
+	for _, tc := range []struct {
+		expression string
+		a1         *fmp.Fmpz
+		a2         *fmp.Fmpz
+		wantErr    bool
+		want       int
+	}{
+		{
+			"%v * %v",
+			fmp.NewFmpz(3),
+			fmp.NewFmpz(4),
+			false,
+			12,
+		},
+	} {
+		//t.Errorf("%v", new(fmp.Fmpz).Add(fmp.NewFmpz(-1), fmp.NewFmpz(2)))
+		v, err := Evalf(tc.expression, tc.a1, tc.a2)
+		if err != nil {
+			t.Fatalf("Eval() failed %s: got err when didnt want err: %v", tc.expression, err)
+		}
+
+		var got int
+		if v != nil {
+			got = v.GetInt()
+		} else {
+			t.Fatalf("Eval() failed: %s got nil Fmpz", tc.expression)
+		}
+
+		if got != tc.want {
+			t.Errorf("Eval() %q failed: got/want mismatched: %d / %d", tc.expression, got, tc.want)
 		}
 	}
 }

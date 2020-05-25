@@ -49,6 +49,17 @@ func Eval(expression string) (*fmp.Fmpz, error) {
 	return nil, fmt.Errorf("eval could not resolve expression %q: %v", expression, p.GetExpressionResult())
 }
 
+// Evalf will resolve a format string expression using Sprintf.
+func Evalf(exp string, a ...interface{}) (*fmp.Fmpz, error) {
+	e := fmt.Sprintf(exp, a...)
+	p := NewParser(e)
+	if val := p.Eval(); val != nil {
+		return val, nil
+	}
+
+	return nil, fmt.Errorf("eval could not resolve expression %q: %v", exp, p.GetExpressionResult())
+}
+
 func parseExpression(set []Token) []Token {
 	mod := false
 	if set[0].Type == function || set[0].Type == lparen {
